@@ -15,7 +15,7 @@
         android:theme="@style/Theme.Bacon">
 
         <activity
-            android:name=".ui.ArticleListActivity"
+            android:name=".ui.activity.ArticleListActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,8 +24,8 @@
         </activity>
 
         <activity
-            android:name=".ui.ArticleDetailActivity"
-            android:parentActivityName=".ui.ArticleListActivity">
+            android:name=".ui.activity.ArticleDetailActivity"
+            android:parentActivityName=".ui.activity.ArticleListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -33,13 +33,13 @@
             </intent-filter>
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.ArticleListActivity" />
+                android:value=".ui.activity.ArticleListActivity" />
         </activity>
 
-        <service android:name=".data.UpdaterService"
+        <service android:name=".service.UpdaterService"
             android:exported="false" />
 
-        <provider android:name=".data.ItemsProvider"
+        <provider android:name=".db.ItemsProvider"
             android:authorities="com.example.xyzreader"
             android:exported="false" />
 

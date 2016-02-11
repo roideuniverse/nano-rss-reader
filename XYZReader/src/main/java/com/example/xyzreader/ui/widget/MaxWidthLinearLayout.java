@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.xyzreader.ui;
+package com.example.xyzreader.ui.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -24,43 +24,52 @@ import android.widget.LinearLayout;
 /**
  * A simple {@link LinearLayout} subclass that has a maxWidth
  */
-public class MaxWidthLinearLayout extends LinearLayout {
+public class MaxWidthLinearLayout extends LinearLayout
+{
     private static final int[] ATTRS = {
             android.R.attr.maxWidth
     };
 
     private int mMaxWidth = Integer.MAX_VALUE;
 
-    public MaxWidthLinearLayout(Context context) {
+    public MaxWidthLinearLayout(Context context)
+    {
         super(context);
         init(context, null, 0, 0);
     }
 
-    public MaxWidthLinearLayout(Context context, AttributeSet attrs) {
+    public MaxWidthLinearLayout(Context context, AttributeSet attrs)
+    {
         super(context, attrs);
         init(context, attrs, 0, 0);
     }
 
-    public MaxWidthLinearLayout(Context context, AttributeSet attrs, int defStyle) {
+    public MaxWidthLinearLayout(Context context, AttributeSet attrs, int defStyle)
+    {
         super(context, attrs, defStyle);
         init(context, attrs, defStyle, 0);
     }
 
-    public MaxWidthLinearLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public MaxWidthLinearLayout(Context context, AttributeSet attrs, int defStyleAttr, int
+            defStyleRes)
+    {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)
+    {
         TypedArray a = context.obtainStyledAttributes(attrs, ATTRS);
         mMaxWidth = a.getLayoutDimension(0, Integer.MAX_VALUE);
         a.recycle();
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
+    {
         int newSpecWidth = Math.min(MeasureSpec.getSize(widthMeasureSpec), mMaxWidth);
-        widthMeasureSpec = MeasureSpec.makeMeasureSpec(newSpecWidth, MeasureSpec.getMode(widthMeasureSpec));
+        widthMeasureSpec = MeasureSpec.makeMeasureSpec(newSpecWidth, MeasureSpec.getMode
+                (widthMeasureSpec));
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 }
