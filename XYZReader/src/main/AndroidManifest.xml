@@ -27,6 +27,7 @@
 
         <activity
             android:name=".ui.activity.ArticleDetailActivity"
+            android:theme="@style/AppTheme.NoActionBar"
             android:parentActivityName=".ui.activity.ArticleListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
