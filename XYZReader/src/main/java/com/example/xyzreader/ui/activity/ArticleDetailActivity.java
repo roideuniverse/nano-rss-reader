@@ -1,5 +1,6 @@
 package com.example.xyzreader.ui.activity;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
@@ -8,13 +9,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.ShareCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowInsets;
 
 import com.example.xyzreader.R;
 import com.example.xyzreader.db.ArticleCursorLoader;
@@ -33,10 +33,7 @@ public class ArticleDetailActivity extends BaseActivity
     private long mStartId;
 
     private long mSelectedItemId;
-    private int mSelectedItemUpButtonFloor = Integer.MAX_VALUE;
-    private int mTopInset;
 
-    private Toolbar mToolbar;
     private ViewPager mPager;
     private MyPagerAdapter mPagerAdapter;
 
@@ -54,8 +51,10 @@ public class ArticleDetailActivity extends BaseActivity
 
         getSupportLoaderManager().initLoader(0, null, this);
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mPagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
         mPager = (ViewPager) findViewById(R.id.pager);
@@ -64,9 +63,14 @@ public class ArticleDetailActivity extends BaseActivity
                 .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, getResources().getDisplayMetrics
                         ()));
         mPager.setPageMarginDrawable(new ColorDrawable(0x22000000));
-
-        mPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener()
+        mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
         {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            {
+
+            }
+
             @Override
             public void onPageSelected(int position)
             {
@@ -80,7 +84,6 @@ public class ArticleDetailActivity extends BaseActivity
             @Override
             public void onPageScrollStateChanged(int state)
             {
-                super.onPageScrollStateChanged(state);
                 //TODO:
                 /*mUpButton.animate()
                         .alpha((state == ViewPager.SCROLL_STATE_IDLE) ? 1f : 0f)
@@ -96,6 +99,18 @@ public class ArticleDetailActivity extends BaseActivity
                 mSelectedItemId = mStartId;
             }
         }
+        findViewById(R.id.share_fab).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                //TODO : Share Fragment details
+                startActivity(Intent.createChooser(ShareCompat.IntentBuilder.from(ArticleDetailActivity.this)
+                        .setType("text/plain")
+                        .setText("Some sample text")
+                        .getIntent(), getString(R.string.action_share)));
+            }
+        });
     }
 
     @Override
@@ -138,27 +153,29 @@ public class ArticleDetailActivity extends BaseActivity
 
     private class MyPagerAdapter extends FragmentStatePagerAdapter
     {
+        private Fragment []mFragments;
         public MyPagerAdapter(FragmentManager fm)
         {
             super(fm);
+            mFragments = new Fragment[getCount()];
         }
 
         @Override
         public Fragment getItem(int position)
         {
             mCursor.moveToPosition(position);
-            return ArticleDetailFragment.newInstance(mCursor.getLong(ArticleCursorLoader.Query._ID));
-        }
-
-        @Override
-        public void setPrimaryItem(ViewGroup container, int position, Object object)
-        {
-            super.setPrimaryItem(container, position, object);
-            ArticleDetailFragment fragment = (ArticleDetailFragment) object;
-            if(fragment != null)
+            if(mFragments.length != getCount())
             {
-                //mSelectedItemUpButtonFloor = fragment.getUpButtonFloor();
+                mFragments = new Fragment[getCount()];
             }
+
+            Fragment frag = mFragments[position];
+            if (frag == null)
+            {
+                frag = ArticleDetailFragment.newInstance(mCursor.getLong(ArticleCursorLoader.Query._ID));
+                mFragments[position] = frag;
+            }
+            return frag;
         }
 
         @Override
