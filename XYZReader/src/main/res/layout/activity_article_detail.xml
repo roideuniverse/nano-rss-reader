@@ -39,7 +39,6 @@
         android:background="@drawable/add_fab_background"
         android:contentDescription="@string/action_share"
         android:src="@drawable/ic_share"
-        android:elevation="@dimen/eighth_margin"
         />
 
 </android.support.design.widget.CoordinatorLayout>
