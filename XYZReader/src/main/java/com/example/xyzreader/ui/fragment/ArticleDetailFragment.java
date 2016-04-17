@@ -175,7 +175,7 @@ public class ArticleDetailFragment extends Fragment implements
                                 @Override
                                 public void onGlobalLayout()
                                 {
-                                    if(getView().getHeight() > 0)
+                                    if(getView() != null && getView().getHeight() > 0)
                                     {
                                         setToolbarTitle();
                                         getView().getViewTreeObserver()
@@ -220,8 +220,6 @@ public class ArticleDetailFragment extends Fragment implements
         TextView bylineView = (TextView) mRootView.findViewById(R.id.article_byline);
         bylineView.setMovementMethod(new LinkMovementMethod());
         TextView bodyView = (TextView) mRootView.findViewById(R.id.article_body);
-        bodyView.setTypeface(Typeface.createFromAsset(getResources().getAssets(),
-                "Rosario-Regular.ttf"));
 
         if(mCursor != null)
         {
