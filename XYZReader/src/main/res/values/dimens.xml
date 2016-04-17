@@ -1,4 +1,15 @@
 <resources>
+    <!-- Standard Margins -->
+    <dimen name="sixteenth_margin">1dp</dimen>
+    <dimen name="eighth_margin">2dp</dimen>
+    <dimen name="quarter_margin">4dp</dimen>
+    <dimen name="half_margin">8dp</dimen>
+    <dimen name="standard_margin">16dp</dimen>
+    <dimen name="three_half_standard">24dp</dimen>
+    <dimen name="double_margin">32dp</dimen>
+    <dimen name="tripe_margin">48dp</dimen>
+    <dimen name="quadruple_margin">64dp</dimen>
+
     <!-- detail -->
     <dimen name="detail_title_text_size">32sp</dimen>
     <dimen name="detail_body_text_size">22sp</dimen>
@@ -7,5 +18,7 @@
     <dimen name="fab_elevation">2dp</dimen>
     <dimen name="fab_press_translation_z">6dp</dimen>
     <dimen name="fab_margin">24dp</dimen>
+
+    <dimen name="dynamic_height_network_view">100dp</dimen>
 
 </resources>

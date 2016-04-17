@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.GeneralSecurityException;
+
+import javax.net.ssl.SSLContext;
 
 public class RemoteEndpointUtil
 {
@@ -56,7 +59,9 @@ public class RemoteEndpointUtil
 
     static String fetchPlainText(URL url) throws IOException
     {
-        return new String(fetch(url), "UTF-8");
+        String data = new String(fetch(url), "UTF-8");
+        Log.d(TAG, "Fetch Complete");
+        return data;
     }
 
     static byte[] fetch(URL url) throws IOException
@@ -66,6 +71,16 @@ public class RemoteEndpointUtil
         try
         {
             OkHttpClient client = new OkHttpClient();
+            SSLContext sslContext;
+            try {
+                sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, null, null);
+            } catch (GeneralSecurityException e) {
+                throw new AssertionError(); // The system has no TLS. Just give up.
+            }
+            client.setSslSocketFactory(sslContext.getSocketFactory());
+
+            Log.d(TAG, "StartingFetch::" + url);
             HttpURLConnection conn = client.open(url);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             in = conn.getInputStream();
