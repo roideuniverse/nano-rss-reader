@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -17,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,6 +29,7 @@ import com.example.xyzreader.db.ArticleCursorLoader;
 import com.example.xyzreader.ui.activity.ArticleDetailActivity;
 import com.example.xyzreader.ui.activity.ArticleListActivity;
 import com.example.xyzreader.ui.helpers.ImageLoaderHelper;
+import com.example.xyzreader.ui.helpers.OnFragmentVisibleCallback;
 import com.example.xyzreader.ui.widget.ObservableScrollView;
 
 /**
@@ -35,7 +38,7 @@ import com.example.xyzreader.ui.widget.ObservableScrollView;
  * tablets) or a {@link ArticleDetailActivity} on handsets.
  */
 public class ArticleDetailFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor>
+        LoaderManager.LoaderCallbacks<Cursor>, OnFragmentVisibleCallback
 {
     public static final String ARG_ITEM_ID = "item_id";
     private static final String TAG = "ArticleDetailFragment";
@@ -53,6 +56,7 @@ public class ArticleDetailFragment extends Fragment implements
     private boolean mIsCard = false;
     private int mStatusBarFullOpacityBottom;
     private ObservableScrollView mScrollView;
+    private String mTitle;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -135,6 +139,12 @@ public class ArticleDetailFragment extends Fragment implements
     }
 
     @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
+    {
+        super.onViewCreated(view, savedInstanceState);
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
@@ -144,6 +154,38 @@ public class ArticleDetailFragment extends Fragment implements
         // fragments because their mIndex is -1 (haven't been added to the activity yet). Thus,
         // we do this in onActivityCreated.
         getLoaderManager().initLoader(0, null, this);
+    }
+
+    private void setToolbarTitle()
+    {
+        ArticleDetailActivity activity = getActivityCast();
+        if(activity != null)
+        {
+            if(activity.getSupportActionBar() != null)
+            {
+                if(isVisible() && mTitle != null)
+                {
+                    activity.getSupportActionBar().setTitle(mTitle);
+                }
+                else if(getView() != null)
+                {
+                    getView().getViewTreeObserver()
+                            .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener()
+                            {
+                                @Override
+                                public void onGlobalLayout()
+                                {
+                                    if(getView().getHeight() > 0)
+                                    {
+                                        setToolbarTitle();
+                                        getView().getViewTreeObserver()
+                                                .removeOnGlobalLayoutListener(this);
+                                    }
+                                }
+                            });
+                }
+            }
+        }
     }
 
     public ArticleDetailActivity getActivityCast()
@@ -186,7 +228,8 @@ public class ArticleDetailFragment extends Fragment implements
             mRootView.setAlpha(0);
             mRootView.setVisibility(View.VISIBLE);
             mRootView.animate().alpha(1);
-            titleView.setText(mCursor.getString(ArticleCursorLoader.Query.TITLE));
+            mTitle = mCursor.getString(ArticleCursorLoader.Query.TITLE);
+            titleView.setText(mTitle);
             bylineView.setText(Html.fromHtml(
                     DateUtils.getRelativeTimeSpanString(
                             mCursor.getLong(ArticleCursorLoader.Query.PUBLISHED_DATE),
@@ -265,5 +308,11 @@ public class ArticleDetailFragment extends Fragment implements
     {
         mCursor = null;
         bindViews();
+    }
+
+    @Override
+    public void onVisible()
+    {
+        setToolbarTitle();
     }
 }

@@ -60,6 +60,12 @@ public class ObservableScrollView extends ScrollView
         }
     }
 
+    @Override
+    public boolean isNestedScrollingEnabled()
+    {
+        return true;
+    }
+
     public void setCallbacks(Callbacks listener)
     {
         mCallbacks = listener;

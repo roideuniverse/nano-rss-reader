@@ -21,6 +21,7 @@ import com.example.xyzreader.db.ArticleCursorLoader;
 import com.example.xyzreader.db.ItemsContract;
 import com.example.xyzreader.ui.base.BaseActivity;
 import com.example.xyzreader.ui.fragment.ArticleDetailFragment;
+import com.example.xyzreader.ui.helpers.OnFragmentVisibleCallback;
 
 /**
  * An activity representing a single Article detail screen, letting you swipe between articles.
@@ -79,6 +80,11 @@ public class ArticleDetailActivity extends BaseActivity
                     mCursor.moveToPosition(position);
                 }
                 mSelectedItemId = mCursor.getLong(ArticleCursorLoader.Query._ID);
+                Fragment frag = mPagerAdapter.getItem(position);
+                if(frag instanceof OnFragmentVisibleCallback)
+                {
+                    ((OnFragmentVisibleCallback) frag).onVisible();
+                }
             }
 
             @Override
@@ -172,7 +178,8 @@ public class ArticleDetailActivity extends BaseActivity
             Fragment frag = mFragments[position];
             if (frag == null)
             {
-                frag = ArticleDetailFragment.newInstance(mCursor.getLong(ArticleCursorLoader.Query._ID));
+                frag = ArticleDetailFragment
+                        .newInstance(mCursor.getLong(ArticleCursorLoader.Query._ID));
                 mFragments[position] = frag;
             }
             return frag;
