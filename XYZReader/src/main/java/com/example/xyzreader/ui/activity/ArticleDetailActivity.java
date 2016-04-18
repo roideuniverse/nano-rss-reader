@@ -15,6 +15,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.example.xyzreader.R;
 import com.example.xyzreader.db.ArticleCursorLoader;
@@ -80,11 +81,7 @@ public class ArticleDetailActivity extends BaseActivity
                     mCursor.moveToPosition(position);
                 }
                 mSelectedItemId = mCursor.getLong(ArticleCursorLoader.Query._ID);
-                Fragment frag = mPagerAdapter.getItem(position);
-                if(frag instanceof OnFragmentVisibleCallback)
-                {
-                    ((OnFragmentVisibleCallback) frag).onVisible();
-                }
+                triggerVisible(position);
             }
 
             @Override
@@ -144,11 +141,7 @@ public class ArticleDetailActivity extends BaseActivity
                     mPager.setCurrentItem(position, false);
                     if(position == 0)
                     {
-                        Fragment frag = mPagerAdapter.getItem(position);
-                        if(frag instanceof OnFragmentVisibleCallback)
-                        {
-                            ((OnFragmentVisibleCallback) frag).onVisible();
-                        }
+                        triggerVisible(position);
                     }
                     break;
                 }
@@ -156,6 +149,22 @@ public class ArticleDetailActivity extends BaseActivity
             }
             mStartId = 0;
         }
+    }
+
+    private void triggerVisible(final int position)
+    {
+        mPager.post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                Fragment frag = mPagerAdapter.getItem(position);
+                if(frag instanceof OnFragmentVisibleCallback)
+                {
+                    ((OnFragmentVisibleCallback) frag).onVisible();
+                }
+            }
+        });
     }
 
     @Override
@@ -172,6 +181,18 @@ public class ArticleDetailActivity extends BaseActivity
         {
             super(fm);
             mFragments = new Fragment[getCount()];
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position)
+        {
+            Object ret = super.instantiateItem(container, position);
+            if(mFragments.length != getCount())
+            {
+                mFragments = new Fragment[getCount()];
+            }
+            mFragments[position] = (Fragment) ret;
+            return ret;
         }
 
         @Override
