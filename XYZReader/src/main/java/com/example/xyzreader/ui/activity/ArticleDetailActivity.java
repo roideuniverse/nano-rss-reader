@@ -142,6 +142,14 @@ public class ArticleDetailActivity extends BaseActivity
                 {
                     final int position = mCursor.getPosition();
                     mPager.setCurrentItem(position, false);
+                    if(position == 0)
+                    {
+                        Fragment frag = mPagerAdapter.getItem(position);
+                        if(frag instanceof OnFragmentVisibleCallback)
+                        {
+                            ((OnFragmentVisibleCallback) frag).onVisible();
+                        }
+                    }
                     break;
                 }
                 mCursor.moveToNext();
