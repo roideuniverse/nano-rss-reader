@@ -3,14 +3,15 @@ package com.example.xyzreader.ui.fragment;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.graphics.Palette;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
@@ -48,15 +49,12 @@ public class ArticleDetailFragment extends Fragment implements
     private long mItemId;
     private View mRootView;
     private int mMutedColor = 0xFF333333;
-    private ColorDrawable mStatusBarColorDrawable;
 
-    private int mTopInset;
     private ImageView mPhotoView;
     private int mScrollY;
-    private boolean mIsCard = false;
-    private int mStatusBarFullOpacityBottom;
     private ObservableScrollView mScrollView;
     private String mTitle;
+    private boolean mTitleImageIsSet = false;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -105,10 +103,6 @@ public class ArticleDetailFragment extends Fragment implements
         {
             mItemId = getArguments().getLong(ARG_ITEM_ID);
         }
-
-        mIsCard = getResources().getBoolean(R.bool.detail_is_card);
-        mStatusBarFullOpacityBottom = getResources().getDimensionPixelSize(
-                R.dimen.detail_card_top_margin);
         setHasOptionsMenu(true);
     }
 
@@ -118,7 +112,6 @@ public class ArticleDetailFragment extends Fragment implements
     {
         mRootView = inflater.inflate(R.layout.fragment_article_detail, container, false);
         mPhotoView = (ImageView) mRootView.findViewById(R.id.photo);
-        mStatusBarColorDrawable = new ColorDrawable(0);
 
         mPhotoView = (ImageView) mRootView.findViewById(R.id.photo);
         mScrollView = (ObservableScrollView) mRootView.findViewById(R.id.scrollview);
@@ -129,12 +122,10 @@ public class ArticleDetailFragment extends Fragment implements
             {
                 mScrollY = mScrollView.getScrollY();
                 mPhotoView.setTranslationY((int) (mScrollY - mScrollY / PARALLAX_FACTOR));
-                updateStatusBar();
             }
         });
 
         bindViews();
-        updateStatusBar();
         return mRootView;
     }
 
@@ -166,6 +157,8 @@ public class ArticleDetailFragment extends Fragment implements
                 if(isVisible() && mTitle != null)
                 {
                     activity.getSupportActionBar().setTitle(mTitle);
+                    setDefaultToolbarColor();
+                    setToolbarImage();
                 }
                 else if(getView() != null)
                 {
@@ -188,25 +181,86 @@ public class ArticleDetailFragment extends Fragment implements
         }
     }
 
+    private void setDefaultToolbarColor()
+    {
+        if(getActivityCast() == null || !isAdded() || !isVisible()) return;
+
+        int defaultColorToolbar = getResources().getColor(R.color.theme_primary);
+        int defaultColorStatusBar = getResources().getColor(R.color.theme_primary_dark);
+
+        //Status bar background color
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            getActivityCast().getWindow().setStatusBarColor(defaultColorStatusBar);
+        }
+
+        Toolbar toolbar = (Toolbar) getActivityCast().findViewById(R.id.toolbar);
+        toolbar.setBackgroundColor(defaultColorToolbar);
+    }
+
+    private void setToolbarImage()
+    {
+        if(isVisible())
+        {
+            if(mTitleImageIsSet)
+            {
+                setToolbarBackground();
+            }
+            else
+            {
+                mPhotoView.getViewTreeObserver()
+                        .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener()
+                {
+                    @Override
+                    public void onGlobalLayout()
+                    {
+                        if(mTitleImageIsSet)
+                        {
+                            mPhotoView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                            setToolbarBackground();
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    private void setToolbarBackground()
+    {
+        if(getActivityCast() == null || !isAdded() || !isVisible()) return;
+
+        int defaultColorToolbar = getResources().getColor(R.color.theme_primary);
+        int defaultColorStatusBar = getResources().getColor(R.color.theme_primary_dark);
+        Palette p = Palette
+                .from(((BitmapDrawable)mPhotoView.getDrawable()).getBitmap()).generate();
+        //Toolbar background color
+        Toolbar toolbar = (Toolbar) getActivityCast().findViewById(R.id.toolbar);
+        int toolBarColor = p.getVibrantColor(defaultColorToolbar);
+        toolbar.setBackgroundColor(toolBarColor);
+
+        //Status bar background color
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            int statusBarColor = darker(toolBarColor, 0.8f);
+            getActivityCast().getWindow().setStatusBarColor(statusBarColor);
+        }
+    }
+
+    public static int darker (int color, float factor) {
+        int a = Color.alpha( color );
+        int r = Color.red( color );
+        int g = Color.green( color );
+        int b = Color.blue( color );
+
+        return Color.argb( a,
+                Math.max( (int)(r * factor), 0 ),
+                Math.max( (int)(g * factor), 0 ),
+                Math.max( (int)(b * factor), 0 ) );
+    }
+
     public ArticleDetailActivity getActivityCast()
     {
         return (ArticleDetailActivity) getActivity();
-    }
-
-    private void updateStatusBar()
-    {
-        int color = 0;
-        if(mPhotoView != null && mTopInset != 0 && mScrollY > 0)
-        {
-            float f = progress(mScrollY,
-                    mStatusBarFullOpacityBottom - mTopInset * 3,
-                    mStatusBarFullOpacityBottom - mTopInset);
-            color = Color.argb((int) (255 * f),
-                    (int) (Color.red(mMutedColor) * 0.9),
-                    (int) (Color.green(mMutedColor) * 0.9),
-                    (int) (Color.blue(mMutedColor) * 0.9));
-        }
-        mStatusBarColorDrawable.setColor(color);
     }
 
     private void bindViews()
@@ -247,12 +301,12 @@ public class ArticleDetailFragment extends Fragment implements
                             Bitmap bitmap = imageContainer.getBitmap();
                             if(bitmap != null)
                             {
-                                Palette p = Palette.generate(bitmap, 12);
+                                Palette p = Palette.from(bitmap).generate();
                                 mMutedColor = p.getDarkMutedColor(0xFF333333);
                                 mPhotoView.setImageBitmap(imageContainer.getBitmap());
                                 mRootView.findViewById(R.id.meta_bar)
                                         .setBackgroundColor(mMutedColor);
-                                updateStatusBar();
+                                mTitleImageIsSet = true;
                             }
                         }
 
