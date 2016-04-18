@@ -147,36 +147,33 @@ public class ArticleDetailFragment extends Fragment implements
         getLoaderManager().initLoader(0, null, this);
     }
 
-    private void setToolbarTitle()
+    private void prepareToolbar()
     {
         ArticleDetailActivity activity = getActivityCast();
-        if(activity != null)
+        if(activity != null && activity.getSupportActionBar() != null)
         {
-            if(activity.getSupportActionBar() != null)
+            if(isVisible() && mTitle != null)
             {
-                if(isVisible() && mTitle != null)
-                {
-                    activity.getSupportActionBar().setTitle(mTitle);
-                    setDefaultToolbarColor();
-                    setToolbarImage();
-                }
-                else if(getView() != null)
-                {
-                    getView().getViewTreeObserver()
-                            .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener()
+                activity.getSupportActionBar().setTitle(mTitle);
+                setDefaultToolbarColor();
+                setToolbarImage();
+            }
+            else if(getView() != null)
+            {
+                getView().getViewTreeObserver()
+                        .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener()
+                        {
+                            @Override
+                            public void onGlobalLayout()
                             {
-                                @Override
-                                public void onGlobalLayout()
+                                if(getView() != null && getView().getHeight() > 0)
                                 {
-                                    if(getView() != null && getView().getHeight() > 0)
-                                    {
-                                        setToolbarTitle();
-                                        getView().getViewTreeObserver()
-                                                .removeOnGlobalLayoutListener(this);
-                                    }
+                                    prepareToolbar();
+                                    getView().getViewTreeObserver()
+                                            .removeOnGlobalLayoutListener(this);
                                 }
-                            });
-                }
+                            }
+                        });
             }
         }
     }
@@ -365,6 +362,6 @@ public class ArticleDetailFragment extends Fragment implements
     @Override
     public void onVisible()
     {
-        setToolbarTitle();
+        prepareToolbar();
     }
 }
